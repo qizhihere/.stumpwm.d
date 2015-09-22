@@ -16,7 +16,9 @@
 ;; applications which will be launch after StumpWM startup
 ;;----------------------------------------------------------------------------
 (add-autostart '("compton -b"
-                 "~/scripts/random-wallpaper.sh"))
+                 "~/scripts/random-wallpaper.sh"
+                 "~/scripts/i3lock.sh"
+                 "keepassx"))
 
 
 ;;----------------------------------------------------------------------------

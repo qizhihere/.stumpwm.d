@@ -37,7 +37,9 @@
                       ("s-'"      "run-shell-command ~/scripts/random-wallpaper.sh")
                       ("s-e"      "run-shell-command thunar")
                       ("s-RET"    "goto-app termite Termite")
-                      ("C-s-RET"  "run-shell-command termite")))
+                      ("C-s-RET"  "run-shell-command termite")
+                      ("s-F1"     "run-shell-command xfce4-popup-whiskermenu")
+                      ("s-F3"     "run-shell-command xfce4-popup-whiskermenu")))
 
 (map-keys *launch-app-map* '(("c"        "goto-app chromium Chromium")
                              ("e"        "goto-app emacs Emacs")

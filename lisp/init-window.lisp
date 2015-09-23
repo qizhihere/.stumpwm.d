@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 ;;----------------------------------------------------------------------------
 ;; basic settings
 ;;----------------------------------------------------------------------------
@@ -56,13 +58,85 @@
               (global-switch-to-window window)
               (throw 'error :abort))))))
 
+(defun topbar-height ()
+  "Get the height of the top bar(or mode line).
+If no top bar exists return 0."
+  (let ((mode-line (head-mode-line (current-head))))
+    (if mode-line (mode-line-height mode-line) 0)))
+
+(defun window-maximized-p (window)
+  "Check if given window is currently maximized."
+  (let* ((screen (current-screen)))
+    (and (= (window-width window) (screen-width screen))
+         (= (window-height window) (- (screen-height screen)
+                                      (topbar-height))))))
+
+;; store window status in a custom list.
+(let ((windows nil))
+  (defun windows/find (window)
+    "Find a window in the window stack."
+    (find window windows :test (lambda (a b) (eql (gethash 'obj b) a))))
+
+  (defun windows/put (window)
+    "Push/update a window into/in the window stack."
+    (let ((existed (windows/find window))
+          ;; create a new object to store window info
+          (obj (make-hash-table)))
+      ;; set window info
+      (dolist (it `((obj . ,window)
+                    (x . ,(window-x window))
+                    (y . ,(window-y window))
+                    (w . ,(window-width window))
+                    (h . ,(window-height window))))
+        (setf (gethash (car it) obj) (cdr it)))
+      (if existed
+          (setf (nth (position existed windows) windows) obj)
+          (push obj windows))))
+
+  (defcommand toggle-window-maximize (&optional window) ()
+    (let* ((window (or window (current-window)))
+           (screen (current-screen))
+           (existed (windows/find window)))
+      (if (or (window-maximized-p window))
+          (progn
+            (if existed
+                (stumpwm.floating-group::float-window-move-resize
+                 window
+                 :x      (gethash 'x existed)
+                 :y      (gethash 'y existed)
+                 :width  (gethash 'w existed)
+                 :height (gethash 'h existed))
+              (stumpwm.floating-group::float-window-move-resize
+               window :x 500 :y 200 :width 800 :height 600))
+              (windows/put window))
+            (progn
+              (windows/put window)
+              (stumpwm.floating-group::float-window-move-resize
+               window
+               :x      0
+               :y      (topbar-height)
+               :width  (screen-width screen)
+               :height (- (screen-height screen) (topbar-height)))))))
+)
+
+
 (defcommand generic-window-fullscreen () ()
   "Toggle tile/float window fullscreen."
   (fullscreen))
 
 (defcommand hide-this-window () ()
   "Hide current window."
-  (hide-window (current-window)))
+  (let* ((group (current-group))
+         (wins (group-windows group))
+         (win (current-window))
+         (other-win (if (group-current-window group)
+                        (find t wins :start 1 :test (lambda (a b) (not (window-hidden-p b))))
+                      (find t wins :test (lambda (a b) (not (window-hidden-p b)))))))
+    (when win
+      (hide-window win)
+      (no-focus group win)
+      (when other-win
+        (group-focus-window group other-win)))))
 
 (map-keys *top-map* '(("s-w"    "global-windowlist")
                       ("s-g"    "grouplist")
@@ -71,7 +145,8 @@
                       ("F11"    "generic-window-fullscreen")
                       ;; minimize/maximize
                       ("s-n"    "hide-this-window")
-                      ("s-N"    "pull-hidden-next")
+                      ("s-N"    "pull-hidden-other")
+                      ("s-m"    "toggle-window-maximize")
                       ;; move between groups
                       ("C-s-Left"   "gprev-with-window")
                       ("C-s-Right"  "gnext-with-window")))
@@ -142,13 +217,18 @@
    (unless (eql group first-group)
     (kill-group group first-group))))
 
-;; custom groups
+;; group title format
 (setf *group-format* "%t")
-(grename       "1. Emacs")
-(gnewbg        "2. Term")
-(gnewbg-float  "3. Net")
-(gnewbg-float  "4. Docs")
-(gnewbg-float  "5. Media")
+
+(defun setup-my-groups ()
+  "Setup my groups."
+  (switch-to-group (first (sort-groups (current-screen))))
+  (grename       "1. Emacs")
+  (gnewbg        "2. Term")
+  (gnewbg-float  "3. Net")
+  (gnewbg-float  "4. Files")
+  (gnewbg-float  "5. Media"))
+(setup-my-groups)
 
 
 ;;----------------------------------------------------------------------------

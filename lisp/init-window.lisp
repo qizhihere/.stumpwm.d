@@ -120,12 +120,14 @@ If no top bar exists return 0."
 )
 
 (defun next-visible-window (&optional group)
+  "Find next visible window in current group."
   (let* ((group (or group (current-group)))
          (wins (group-windows group)))
     (find t wins :start (if (group-current-window group) 1 0)
           :test (lambda (a b) (not (window-hidden-p b))))))
 
 (defun other-window-click (button)
+  "Send mouse click event to other window."
   (let* ((other-win (next-visible-window)))
     (when other-win
       (send-fake-click other-win button))))
@@ -248,19 +250,3 @@ If no top bar exists return 0."
   (gnewbg-float  "4. Files")
   (gnewbg-float  "5. Media"))
 (setup-my-groups)
-
-
-;;----------------------------------------------------------------------------
-;; window control
-;;----------------------------------------------------------------------------
-(defun send-key-other-window (dir)
-  (stumpwm::send-fake-key
-   (stumpwm::frame-window (stumpwm::tile-group-last-frame (current-group)))
-   (kbd dir)))
-
-(defcommand scroll-other-window-down () ()
-            "Scroll other window down."
-            (send-key-other-window "Next"))
-(defcommand scroll-other-window-up () ()
-            "Scroll other window down."
-            (send-key-other-window "Prior"))

@@ -119,6 +119,24 @@ If no top bar exists return 0."
                :height (- (screen-height screen) (topbar-height)))))))
 )
 
+(defun next-visible-window (&optional group)
+  (let* ((group (or group (current-group)))
+         (wins (group-windows group)))
+    (find t wins :start (if (group-current-window group) 1 0)
+          :test (lambda (a b) (not (window-hidden-p b))))))
+
+(defun other-window-click (button)
+  (let* ((other-win (next-visible-window)))
+    (when other-win
+      (send-fake-click other-win button))))
+
+(defcommand other-window-scroll-down () ()
+  "Scroll other window down."
+  (other-window-click 5))
+
+(defcommand other-window-scroll-up () ()
+  "Scroll other window up."
+  (other-window-click 4))
 
 (defcommand generic-window-fullscreen () ()
   "Toggle tile/float window fullscreen."
@@ -129,9 +147,7 @@ If no top bar exists return 0."
   (let* ((group (current-group))
          (wins (group-windows group))
          (win (current-window))
-         (other-win (if (group-current-window group)
-                        (find t wins :start 1 :test (lambda (a b) (not (window-hidden-p b))))
-                      (find t wins :test (lambda (a b) (not (window-hidden-p b)))))))
+         (other-win (next-visible-window)))
     (when win
       (hide-window win)
       (no-focus group win)
@@ -149,7 +165,10 @@ If no top bar exists return 0."
                       ("s-m"    "toggle-window-maximize")
                       ;; move between groups
                       ("C-s-Left"   "gprev-with-window")
-                      ("C-s-Right"  "gnext-with-window")))
+                      ("C-s-Right"  "gnext-with-window")
+                      ;; Scroll other window
+                      ("C-s-v" "other-window-scroll-down")
+                      ("C-s-b" "other-window-scroll-up")))
 
 (map-keys *root-map* '(("w"    "global-windowlist")
                        ;; emacs style window shortcuts

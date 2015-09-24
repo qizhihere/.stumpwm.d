@@ -264,3 +264,8 @@ If no top bar exists return 0."
   (switch-to-group (nth-group 0)))
 
 (setup-my-groups)
+
+
+;; specify window rules and handlers
+(add-window-handler '(:class "Notify-osd")
+                    (lambda (win rules) (move-window-to-corner "top right" win)))

@@ -69,6 +69,19 @@ current) group."
          (= (window-height window) (- (screen-height screen)
                                       (topbar-height))))))
 
+(defun move-window-to-corner (direction &optional (window (current-window))
+                                          (screen (current-screen)))
+  (let (x y w h)
+    (dolist (direct (split-string direction " +"))
+      (cond
+        ((string= direct "top") (setf y (topbar-height)))
+        ((string= direct "bottom") (setf y (- (screen-height screen)
+                                              (window-height window))))
+        ((string= direct "left") (setf x 0))
+        ((string= direct "right") (setf x (- (screen-width screen)
+                                             (window-width window))))))
+    (stumpwm.floating-group::float-window-move-resize window :x x :y y)))
+
 (defun add-autostart (command)
   "Add autostart app."
   (if (listp command)

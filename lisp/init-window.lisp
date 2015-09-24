@@ -31,7 +31,7 @@
 
 
 ;;----------------------------------------------------------------------------
-;; window control
+;; global window list
 ;;----------------------------------------------------------------------------
 (defun global-window-list ()
   "Returns a list of the names of all the windows in the current screen."
@@ -47,6 +47,13 @@
     (switch-to-group group)
     (group-focus-window group window)))
 
+(defun next-visible-window (&optional group)
+  "Find next visible window in current group."
+  (let* ((group (or group (current-group)))
+         (wins (group-windows group)))
+    (find t wins :start (if (group-current-window group) 1 0)
+          :test (lambda (a b) (not (window-hidden-p b))))))
+
 (defcommand global-windowlist (&optional (fmt *window-format*)
                                          window-list) (:rest)
   "Select window from global window list."
@@ -58,6 +65,34 @@
               (global-switch-to-window window)
               (throw 'error :abort))))))
 
+
+;;----------------------------------------------------------------------------
+;; globally switch to previous window
+;;----------------------------------------------------------------------------
+(defvar *global-previous* '())
+(defvar *global-current* '())
+
+(defun remember-focus-window-hook (new old)
+  (setf *global-previous* *global-current*)
+  (setf *global-current* new))
+
+(add-hook *focus-window-hook* 'remember-focus-window-hook)
+
+(defcommand global-previous () ()
+  "Switch to the previous window (possibly from another group) that had focus"
+  (let*
+      ((window *global-previous*)
+       (group (if window (window-group window)))
+       (frame (ignore-errors (window-frame window))))
+    (when (and window (not (= 0 (window-state window))))
+      (gselect group)
+      (and frame (focus-frame group frame))
+      (focus-window window))))
+
+
+;;----------------------------------------------------------------------------
+;; toggle window maximize(don't cover the mode line)
+;;----------------------------------------------------------------------------
 (defun topbar-height ()
   "Get the height of the top bar(or mode line).
 If no top bar exists return 0."
@@ -72,60 +107,57 @@ If no top bar exists return 0."
                                       (topbar-height))))))
 
 ;; store window status in a custom list.
-(let ((windows nil))
-  (defun windows/find (window)
-    "Find a window in the window stack."
-    (find window windows :test (lambda (a b) (eql (gethash 'obj b) a))))
+(defvar *window-status-list* '())
 
-  (defun windows/put (window)
-    "Push/update a window into/in the window stack."
-    (let ((existed (windows/find window))
-          ;; create a new object to store window info
-          (obj (make-hash-table)))
-      ;; set window info
-      (dolist (it `((obj . ,window)
-                    (x . ,(window-x window))
-                    (y . ,(window-y window))
-                    (w . ,(window-width window))
-                    (h . ,(window-height window))))
-        (setf (gethash (car it) obj) (cdr it)))
-      (if existed
-          (setf (nth (position existed windows) windows) obj)
-          (push obj windows))))
+(defun windows/find (window)
+  "Find a window in the window stack."
+  (find window *window-status-list* :test (lambda (a b) (eql (gethash 'obj b) a))))
 
-  (defcommand toggle-window-maximize (&optional window) ()
-    (let* ((window (or window (current-window)))
-           (screen (current-screen))
-           (existed (windows/find window)))
-      (if (or (window-maximized-p window))
-          (progn
-            (if existed
-                (stumpwm.floating-group::float-window-move-resize
-                 window
-                 :x      (gethash 'x existed)
-                 :y      (gethash 'y existed)
-                 :width  (gethash 'w existed)
-                 :height (gethash 'h existed))
-              (stumpwm.floating-group::float-window-move-resize
-               window :x 500 :y 200 :width 800 :height 600))
-              (windows/put window))
-            (progn
-              (windows/put window)
+(defun windows/put (window)
+  "Push/update a window into/in the window stack."
+  (let ((existed (windows/find window))
+        ;; create a new object to store window info
+        (obj (make-hash-table)))
+    ;; set window info
+    (dolist (it `((obj . ,window)
+                  (x . ,(window-x window))
+                  (y . ,(window-y window))
+                  (w . ,(window-width window))
+                  (h . ,(window-height window))))
+      (setf (gethash (car it) obj) (cdr it)))
+    (if existed
+        (setf (nth (position existed *window-status-list*) *window-status-list*) obj)
+      (push obj *window-status-list*))))
+
+(defcommand toggle-window-maximize (&optional window) ()
+  (let* ((window (or window (current-window)))
+         (screen (current-screen))
+         (existed (windows/find window)))
+    (if (or (window-maximized-p window))
+        (progn
+          (if existed
               (stumpwm.floating-group::float-window-move-resize
                window
-               :x      0
-               :y      (topbar-height)
-               :width  (screen-width screen)
-               :height (- (screen-height screen) (topbar-height)))))))
-)
+               :x      (gethash 'x existed)
+               :y      (gethash 'y existed)
+               :width  (gethash 'w existed)
+               :height (gethash 'h existed))
+            (stumpwm.floating-group::float-window-move-resize
+             window :x 500 :y 200 :width 800 :height 600))
+          (windows/put window))
+      (progn
+        (windows/put window)
+        (stumpwm.floating-group::float-window-move-resize
+         window
+         :x      0
+         :y      (topbar-height)
+         :width  (screen-width screen)
+         :height (- (screen-height screen) (topbar-height)))))))
 
-(defun next-visible-window (&optional group)
-  "Find next visible window in current group."
-  (let* ((group (or group (current-group)))
-         (wins (group-windows group)))
-    (find t wins :start (if (group-current-window group) 1 0)
-          :test (lambda (a b) (not (window-hidden-p b))))))
 
+;;----------------------------------------------------------------------------
+;; scroll other window
+;;----------------------------------------------------------------------------
 (defun other-window-click (button)
   "Send mouse click event to other window."
   (let* ((other-win (next-visible-window)))
@@ -140,6 +172,10 @@ If no top bar exists return 0."
   "Scroll other window up."
   (other-window-click 4))
 
+
+;;----------------------------------------------------------------------------
+;; other tricks
+;;----------------------------------------------------------------------------
 (defcommand generic-window-fullscreen () ()
   "Toggle tile/float window fullscreen."
   (fullscreen))
@@ -156,9 +192,13 @@ If no top bar exists return 0."
       (when other-win
         (group-focus-window group other-win)))))
 
+
+;;----------------------------------------------------------------------------
+;; map keys
+;;----------------------------------------------------------------------------
 (map-keys *top-map* '(("s-w"    "global-windowlist")
                       ("s-g"    "grouplist")
-                      ("s-TAB"  "other")
+                      ("s-TAB"  "global-previous")
                       ("s-C-BackSpace"  "delete")
                       ("F11"    "generic-window-fullscreen")
                       ;; minimize/maximize
@@ -241,6 +281,7 @@ If no top bar exists return 0."
 ;; group title format
 (setf *group-format* "%t")
 
+;; initialize my groups
 (defun setup-my-groups ()
   "Setup my groups."
   (switch-to-group (first (sort-groups (current-screen))))
@@ -250,3 +291,12 @@ If no top bar exists return 0."
   (gnewbg-float  "4. Files")
   (gnewbg-float  "5. Media"))
 (setup-my-groups)
+
+
+;;----------------------------------------------------------------------------
+;; unmanaged windows
+;;----------------------------------------------------------------------------
+;; Deny all map requests
+(setf *suppress-deny-messages* t
+      *deny-map-request* '((:class "xfce4-notifyd"))
+      *deny-raise-request* '((:class "xfce4-notifyd")))

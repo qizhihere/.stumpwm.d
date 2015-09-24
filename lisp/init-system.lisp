@@ -10,3 +10,11 @@
                       ("C-XF86AudioLowerVolume"  "amixer-Headphone-1-")
                       ("C-XF86AudioRaiseVolume"  "amixer-Headphone-1+")
                       ("C-XF86AudioMute"         "amixer-Headphone-toggle")))
+
+
+;; use truetype fonts
+(add-to-load-path (concat *config-directory*  "modules/stumpwm-contrib/util/ttf-fonts"))
+(load-module "ttf-fonts")
+(ignore-errors
+  (or (stumpwm::set-font (make-instance 'xft:font :family "WenQuanYi Micro Hei" :subfamily "Regular" :size 13))
+      (set-font "-misc-wenquanyi micro hei-medium-r-normal--0-0-0-0-p-0-iso10646-1")))

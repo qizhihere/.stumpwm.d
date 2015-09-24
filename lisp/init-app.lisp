@@ -35,7 +35,6 @@
 (map-keys *root-map* '(("c" "goto-app chromium Chromium")
                        ("g" *launch-app-map*)))
 
-
 (map-keys *top-map* '(("s-l"      "run-shell-command ~/scripts/i3lock.sh")
                       ("s-'"      "run-shell-command ~/scripts/random-wallpaper.sh")
                       ("s-e"      "run-shell-command thunar")

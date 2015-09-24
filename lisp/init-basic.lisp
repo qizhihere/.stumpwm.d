@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 ;; set default prefix key
 (set-prefix-key (kbd "s-z"))
 

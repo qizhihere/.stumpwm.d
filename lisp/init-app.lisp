@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 (defun launch-autostarts ()
   "launch autostart apps."
   (when (boundp '*autostarts*)
@@ -30,7 +32,9 @@
 
 ;; prefix key
 (defvar *launch-app-map* (make-sparse-keymap))
-(define-key *root-map* (kbd "g") *launch-app-map*)
+(map-keys *root-map* '(("c" "goto-app chromium Chromium")
+                       ("g" *launch-app-map*)))
+
 
 (map-keys *top-map* '(("s-l"      "run-shell-command ~/scripts/i3lock.sh")
                       ("s-'"      "run-shell-command ~/scripts/random-wallpaper.sh")

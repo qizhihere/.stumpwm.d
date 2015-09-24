@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 (require :swank)
 (swank-loader:init)
 

@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 ;; Volume Control
 (add-to-load-path (concat *config-directory*  "modules/stumpwm-contrib/media/amixer"))
 (load-module "amixer")
@@ -8,5 +10,3 @@
                       ("C-XF86AudioLowerVolume"  "amixer-Headphone-1-")
                       ("C-XF86AudioRaiseVolume"  "amixer-Headphone-1+")
                       ("C-XF86AudioMute"         "amixer-Headphone-toggle")))
-
-

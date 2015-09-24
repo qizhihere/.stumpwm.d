@@ -1,3 +1,5 @@
+(in-package :stumpwm)
+
 (defmacro map-keys (map keys)
   "Map a list of keys."
   `(dolist (pair ,keys)
@@ -14,5 +16,3 @@ list. If `APPEND' is non-nil, then it will be appended to the list."
     (unless (member element val)
       (set list-var (if append (append val (list element))
                         (cons element val))))))
-
-(print "hello!")

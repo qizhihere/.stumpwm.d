@@ -268,4 +268,4 @@ If no top bar exists return 0."
 
 ;; specify window rules and handlers
 (add-window-handler '(:class "Notify-osd")
-                    (lambda (win rules) (move-window-to-corner "top right" win)))
+                    (lambda (win rules) (unfocus win rules) (move-window-to-corner "top right" win)))

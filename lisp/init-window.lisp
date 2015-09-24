@@ -33,27 +33,6 @@
 ;;----------------------------------------------------------------------------
 ;; global window list
 ;;----------------------------------------------------------------------------
-(defun global-window-list ()
-  "Returns a list of the names of all the windows in the current screen."
-  (let ((groups (sort-groups (current-screen)))
-        (windows nil))
-    (dolist (group groups)
-      (dolist (window (group-windows group))
-        (setf windows (append windows (list window)))))
-    windows))
-
-(defun global-switch-to-window (window)
-  (let ((group (window-group window)))
-    (switch-to-group group)
-    (group-focus-window group window)))
-
-(defun next-visible-window (&optional group)
-  "Find next visible window in current group."
-  (let* ((group (or group (current-group)))
-         (wins (group-windows group)))
-    (find t wins :start (if (group-current-window group) 1 0)
-          :test (lambda (a b) (not (window-hidden-p b))))))
-
 (defcommand global-windowlist (&optional (fmt *window-format*)
                                          window-list) (:rest)
   "Select window from global window list."
@@ -98,13 +77,6 @@
 If no top bar exists return 0."
   (let ((mode-line (head-mode-line (current-head))))
     (if mode-line (mode-line-height mode-line) 0)))
-
-(defun window-maximized-p (window)
-  "Check if given window is currently maximized."
-  (let* ((screen (current-screen)))
-    (and (= (window-width window) (screen-width screen))
-         (= (window-height window) (- (screen-height screen)
-                                      (topbar-height))))))
 
 ;; store window status in a custom list.
 (defvar *window-status-list* '())
@@ -272,31 +244,26 @@ If no top bar exists return 0."
                       ("s-*"      "move-this-window-to-group-n 8")
                       ("s-("      "move-this-window-to-group-n 9")))
 
-;; kill all groups
-(dolist (group (screen-groups (current-screen)))
-  (let ((first-group (current-group)))
-   (unless (eql group first-group)
-    (kill-group group first-group))))
-
 ;; group title format
 (setf *group-format* "%t")
 
 ;; initialize my groups
 (defun setup-my-groups ()
   "Setup my groups."
-  (switch-to-group (first (sort-groups (current-screen))))
+  (switch-to-group (nth-group 0))
+
+  ;; kill all other groups
+  (dolist (group (screen-groups (current-screen)))
+    (let ((first-group (current-group)))
+      (unless (eql group first-group)
+        (kill-group group first-group))))
+
+  ;; create groups
   (grename       "1. Emacs")
   (gnewbg        "2. Term")
   (gnewbg-float  "3. Net")
   (gnewbg-float  "4. Files")
-  (gnewbg-float  "5. Media"))
+  (gnewbg-float  "5. Media")
+  (switch-to-group (nth-group 0)))
+
 (setup-my-groups)
-
-
-;;----------------------------------------------------------------------------
-;; unmanaged windows
-;;----------------------------------------------------------------------------
-;; Deny all map requests
-(setf *suppress-deny-messages* t
-      *deny-map-request* '((:class "xfce4-notifyd"))
-      *deny-raise-request* '((:class "xfce4-notifyd")))

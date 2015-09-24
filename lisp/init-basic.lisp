@@ -21,3 +21,12 @@
 
 (map-keys *root-map* '(("q" "abort")
                        ("1" "only")))
+
+
+;; launch auto-start apps
+(defun launch-autostarts ()
+  "launch auto-start apps."
+  (when (boundp '*autostarts*)
+    (dolist (cmd *autostarts*) (run-shell-command cmd))))
+
+(add-hook *start-hook* 'launch-autostarts)

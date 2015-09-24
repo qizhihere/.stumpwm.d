@@ -17,5 +17,5 @@
 (load-conf "init-swank")
 (load-conf "init-basic")
 (load-conf "init-system")
-(load-conf "init-app")
 (load-conf "init-window")
+(load-conf "init-app")

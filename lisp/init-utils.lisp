@@ -53,12 +53,12 @@ current) group."
 (defun global-switch-to-window (window)
   (let ((group (window-group window)))
     (switch-to-group group)
-    (group-focus-window group window)))
+    (group-focus-window group window)
+    (raise-window window)))
 
-(defun next-visible-window (&optional group exclude-rules)
-  "Find next visible window in current group."
-  (let* ((group (or group (current-group)))
-         (wins (group-windows group)))
+(defun next-visible-window (&optional exclude-rules (group (current-group)))
+  "Find next visible window in given(or current) group."
+  (let* ((wins (group-windows group)))
     (find t wins :start (if (group-current-window group) 1 0)
           :test (lambda (a b) (and (not (window-hidden-p b))
                                (if exclude-rules (not (apply #'window-matches-properties-p
@@ -67,8 +67,9 @@ current) group."
 
 (defun unfocus (window &optional exclude-rules)
   "Focus next visible window."
-  (let ((group (window-group window)))
-    (no-focus group (next-visible-window group exclude-rules))))
+  (let ((next-win (or (next-visible-window exclude-rules)
+                      (current-window))))
+    (screen-set-focus (window-screen next-win) next-win)))
 
 (defun window-maximized-p (window)
   "Check if given window is currently maximized."

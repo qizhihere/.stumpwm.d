@@ -253,10 +253,7 @@ If no top bar exists return 0."
   (switch-to-group (nth-group 0))
 
   ;; kill all other groups
-  (dolist (group (screen-groups (current-screen)))
-    (let ((first-group (current-group)))
-      (unless (eql group first-group)
-        (kill-group group first-group))))
+  (kill-other-groups)
 
   ;; create groups
   (grename       "1. Emacs")

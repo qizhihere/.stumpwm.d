@@ -26,6 +26,21 @@ If `BODY' is nil, do nothing."
      (switch-to-group ,group)
      ,@body))
 
+(defun other-groups (&optional group screen)
+  "Get other groups in screen(or given screen) except given(or
+current) group."
+  (let ((current (or group (current-group))))
+    (remove-if (lambda (x) (eql x current))
+               (sort-these-groups (screen-groups (or screen (current-screen)))))))
+
+(defun kill-other-groups (&optional group screen)
+  "Kill all other groups."
+  (mapcar #'kill-group (other-groups group screen)))
+
+(defun sort-these-groups (groups &optional (sort-fn #'<) &key (key #'group-number))
+  "Sort given groups."
+  (apply 'sort groups sort-fn `(:key ,key)))
+
 (defun global-window-list ()
   "Returns a list of the names of all the windows in the current screen."
   (let ((groups (sort-groups (current-screen)))
@@ -59,3 +74,18 @@ If `BODY' is nil, do nothing."
   (if (listp command)
       (dolist (x command) (add-autostart x))
       (add-to-list '*autostarts* command)))
+
+;; handle window with corresponding handler if it matches a rule
+(defvar *window-handlers* '())
+(add-hook *new-window-hook* 'handle-window)
+
+(defun handle-window (window)
+  (let ((handlers (remove-if-not (lambda (it) (apply #'window-matches-properties-p window (car it)))
+                                 *window-handlers*)))
+    (dolist (it handlers)
+      (and (cdr it)
+           (funcall (cdr it) window (car it))))))
+
+(defun add-window-handler (rule handler)
+  "Append a new window handler to `*window-handlers*'."
+  (add-to-list '*window-handlers* (cons rule handler) t))

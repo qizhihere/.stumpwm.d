@@ -7,6 +7,8 @@
 (map-keys *top-map* '(("XF86AudioLowerVolume"    "amixer-Master-1-")
                       ("XF86AudioRaiseVolume"    "amixer-Master-1+")
                       ("XF86AudioMute"           "amixer-Master-toggle")
+                      ("s-XF86AudioLowerVolume"  "amixer-Master-toggle")
+                      ("s-XF86AudioRaiseVolume"  "amixer-Master-toggle")
                       ("C-XF86AudioLowerVolume"  "amixer-Headphone-1-")
                       ("C-XF86AudioRaiseVolume"  "amixer-Headphone-1+")
                       ("C-XF86AudioMute"         "amixer-Headphone-toggle")))

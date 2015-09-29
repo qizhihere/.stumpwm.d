@@ -20,3 +20,7 @@
 (ignore-errors
   (or (stumpwm::set-font (make-instance 'xft:font :family "WenQuanYi Micro Hei" :subfamily "Regular" :size 13))
       (set-font "-misc-wenquanyi micro hei-medium-r-normal--0-0-0-0-p-0-iso10646-1")))
+
+
+;; launch dbus
+(run-shell-command "type -a dbus-update-activation-environment &>/dev/null && dbus-update-activation-environment --all")

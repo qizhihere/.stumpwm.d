@@ -19,7 +19,10 @@
                       ("s-RET"    "goto-app termite Termite")
                       ("C-s-RET"  "run-shell-command termite")
                       ("s-F1"     "run-shell-command xfce4-popup-whiskermenu")
-                      ("s-F3"     "run-shell-command xfce4-popup-whiskermenu")))
+                      ("s-F3"     "run-shell-command xfce4-popup-whiskermenu")
+                      ("Print"    "run-shell-command killall -9 shutter;shutter -f")
+                      ("C-Print"    "run-shell-command killall -9 shutter;shutter -w")
+                      ("Sys_Req"    "run-shell-command killall -9 shutter;shutter -s &")))
 
 (map-keys *launch-app-map* '(("c"        "goto-app chromium Chromium")
                              ("e"        "goto-app emacs Emacs")

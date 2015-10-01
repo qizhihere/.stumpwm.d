@@ -8,6 +8,28 @@
    (:string "Window Class to match: "))
   (run-or-raise command `(:class ,class)))
 
+(defvar *screenshot-dir* "~/Pictures/screenshots/")
+(defvar *screenshot-ext* ".png")
+(defcommand scrot (flags)
+    ((:rest "scrot flags: "))
+  (ensure-directories-exist *screenshot-dir*)
+  (let* ((dir (string-right-trim "/" *screenshot-dir*))
+         (fpath-gen (lambda () (concat *screenshot-dir* "/" (random-string) *screenshot-ext*)))
+         (post-commands '("notify-send -i dialog-information -a scrot -t 5000 截图已保存至 \$f"
+                          "echo \$f | xsel -bi"))
+         (flags (concat " " flags " -e '" (reduce (lambda (a b) (concat a ";" b)) post-commands) "'"))
+         (fpath (funcall fpath-gen))
+         (retry 100))
+    (loop for i from 1 to retry
+          until (not (probe-file fpath))
+          do
+          (setf fpath (funcall fpath-gen)))
+    (run-shell-command (concat "scrot " fpath flags))))
+
+(defun random-string (&optional (length 10))
+  "Random string generator, default length is 10."
+  (run-shell-command (concat "tr -dc a-zA-Z0-9 < /dev/urandom | head -c" (write-to-string length)) t))
+
 ;; prefix key
 (defvar *launch-app-map* (make-sparse-keymap))
 (map-keys *root-map* '(("c" "goto-app chromium Chromium")
@@ -20,9 +42,11 @@
                       ("C-s-RET"  "run-shell-command termite")
                       ("s-F1"     "run-shell-command xfce4-popup-whiskermenu")
                       ("s-F3"     "run-shell-command xfce4-popup-whiskermenu")
-                      ("Print"    "run-shell-command shutter -f")
-                      ("C-Print"    "run-shell-command killall -9 shutter;shutter -w")
-                      ("Sys_Req"    "run-shell-command killall -9 shutter;shutter -s &")))
+                      ("Print"    "scrot \"\"") ;; empty placeholder
+                      ("C-Print"  "scrot -u")
+                      ("Sys_Req"  "scrot -s")
+                      ("M-Print"  "scrot -cd 5")))
+
 
 (map-keys *launch-app-map* '(("c"        "goto-app chromium Chromium")
                              ("e"        "goto-app emacs Emacs")

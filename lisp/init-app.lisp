@@ -45,7 +45,8 @@
                       ("Print"    "scrot \"\"") ;; empty placeholder
                       ("C-Print"  "scrot -u")
                       ("Sys_Req"  "scrot -s")
-                      ("M-Print"  "scrot -cd 5")))
+                      ("M-Print"  "scrot -cd 5")
+                      ("C-M-S"  "run-shell-command gpick -p")))
 
 
 (map-keys *launch-app-map* '(("c"        "goto-app chromium Chromium")

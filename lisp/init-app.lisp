@@ -51,7 +51,7 @@
 
 
 (map-keys *launch-app-map* '(("c"        "goto-app chromium Chromium")
-                             ("e"        "goto-app emacs Emacs")
+                             ("e"        "goto-app \"env LC_CTYPE=zh_CN.UTF-8\" Emacs")
                              ("s"        "goto-app sublime_text_3_imfix Sublime")
                              ("t"        "goto-app termite Termite")
                              ("T"        "run-shell-command termite")))

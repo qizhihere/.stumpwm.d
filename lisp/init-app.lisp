@@ -33,6 +33,7 @@
 ;; prefix key
 (defvar *launch-app-map* (make-sparse-keymap))
 (map-keys *root-map* '(("c" "goto-app chromium Chromium")
+                       ("C"        "run-shell-command chromium")
                        ("g" *launch-app-map*)))
 
 (map-keys *top-map* '(("s-l"      "run-shell-command ~/scripts/i3lock.sh")

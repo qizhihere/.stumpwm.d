@@ -172,7 +172,7 @@ If no top bar exists return 0."
                       ("s-g"    "grouplist")
                       ("s-TAB"  "global-previous")
                       ("s-C-BackSpace"  "delete")
-                      ("F11"    "generic-window-fullscreen")
+                      ("C-F11"    "generic-window-fullscreen")
                       ;; minimize/maximize
                       ("s-n"    "hide-this-window")
                       ("s-N"    "pull-hidden-other")

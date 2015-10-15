@@ -31,7 +31,7 @@
 
 (defcommand scrot-to-blog-directory (flags)
   ((:rest "scrot flags: "))
-  (run-commands (concat "scrot ~/org/img .png " flags)))
+  (run-commands (concat "scrot ~/blog/img .png " flags)))
 
 (defun random-string (&optional (length 10))
   "Random string generator, default length is 10."

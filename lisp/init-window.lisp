@@ -257,7 +257,7 @@ If no top bar exists return 0."
 
   ;; create groups
   (grename       "1. Emacs")
-  (gnewbg        "2. Term")
+  (gnewbg-float  "2. Term")
   (gnewbg-float  "3. Net")
   (gnewbg-float  "4. Files")
   (gnewbg-float  "5. Media")
@@ -275,4 +275,4 @@ If no top bar exists return 0."
 (add-window-handler '(:title "Whisker Menu")
                     (lambda (win rules)
                       (move-window-to-group win (current-group))
-                      (move-window-to-corner "top left" win)))
+                       (move-window-to-corner "top left" win)))

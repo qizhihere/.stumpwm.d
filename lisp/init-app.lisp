@@ -76,7 +76,7 @@
 
 (defun launch-my-apps ()
   (setf init-group-apps '((0 . ("goto-app emacs Emacs"))
-                          (1 . ("goto-app termite Emacs"))
+                          (1 . ("goto-app termite Termite"))
                           (2 . ("goto-app chromium Chromium"))
                           (4 . ("goto-app thunar Thunar"))))
 

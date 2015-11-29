@@ -86,4 +86,4 @@
 
   ;; return to the first group
   (switch-to-group (nth-group 0)))
-(add-hook *start-hook* 'launch-my-apps)
+;; (add-hook *start-hook* 'launch-my-apps)

@@ -15,6 +15,10 @@
       *message-window-gravity* :center
       *input-window-gravity* :center)
 
+;; change cursor shape
+(run-shell-command "xsetroot -cursor_name left_ptr")
+
+
 (map-keys *top-map* '(("s-:" "eval")
                       ("s-;" "colon")
                       ("s-r" "run-shell-command")))

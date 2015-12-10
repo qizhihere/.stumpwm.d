@@ -16,7 +16,7 @@
   (let* ((dir (string-right-trim "/" dir))
          (fpath-gen (lambda () (concat dir "/" (random-string) ext)))
          (post-commands '("notify-send -i dialog-information -a scrot -t 5000 截图已保存至 \$f"
-                          "echo \$f | xsel -bi"))
+                          "echo -n \$f | xsel -bi"))
          (flags (concat " " flags " -e '" (reduce (lambda (a b) (concat a ";" b)) post-commands) "'"))
          (fpath (funcall fpath-gen)))
     (loop for i from 1 to 100
